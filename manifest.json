@@ -1,0 +1,18 @@
+{
+  "name": "Somnium - Celestial Dream Journal",
+  "short_name": "Somnium",
+  "description": "A premium dream journal with AI-powered cosmic interpretations and cloud synchronization.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#09090e",
+  "theme_color": "#09090e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

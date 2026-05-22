@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Somnium — Celestial Dream Journal</title>
+  
+  <!-- Manifest Link -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#09090e">
+  <link rel="icon" type="image/png" href="icon-512.png">
+  
+  <!-- Apple Web App Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Somnium">
+  
+  <!-- Google Fonts: Instrument Serif + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  
+  <!-- MarkedJS for Markdown Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js" integrity="sha512-74y05J7sZg+8e3c+zK8K10Wd/4n5uC4UeXF5S3c6z3093P25yY70D8412s1l102Yg6Xg17d743w6yU12y80PjQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <!-- Twinkling Starfield and Nebula BG -->
+  <canvas id="stars-canvas"></canvas>
+  <div class="nebula nebula-cyan"></div>
+  <div class="nebula nebula-purple"></div>
+
+  <!-- Immersive Cosmic Landing View -->
+  <div id="landing-view" class="landing-container">
+    <div class="landing-content glass-card">
+      <div class="landing-logo">
+        <svg class="landing-logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 21a9 9 0 100-18 9 9 0 000 18z" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 7v5l3 3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 2v2M12 20v2M4 12H2M22 12h-2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2>Somnium</h2>
+        <p class="tagline">Celestial Subconscious Sanctuary</p>
+      </div>
+      
+      <div class="landing-features">
+        <div class="feat-card">
+          <div class="feat-icon">🧘</div>
+          <h4>Binaural Drones</h4>
+          <p>Calm your mind with synthesizers configured for theta lucid dreaming states.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🎨</div>
+          <h4>Subconscious Sketchpad</h4>
+          <p>Draw dream symbols or upload visual references for multimodal analysis.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🎙️</div>
+          <h4>Voice Memoir</h4>
+          <p>Record voice notes immediately upon waking to capture transient dreamscapes.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔮</div>
+          <h4>AI Cosmic Logic</h4>
+          <p>Interpret symbols and archetypes using advanced OpenRouter reasoning models.</p>
+        </div>
+      </div>
+
+      <div class="landing-auth-box">
+        <button id="btn-google-login" class="btn btn-primary btn-large">
+          <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+          </svg>
+          <span>Access with Google Account</span>
+        </button>
+        
+        <div class="divider"><span>or</span></div>
+        
+        <button id="btn-guest-mode" class="btn btn-secondary">
+          <span>Enter as Guest (Local Sanctuary)</span>
+        </button>
+        
+        <p class="fb-notice">Firebase cloud sync requires connection details. Configure your cloud credentials in Settings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <svg class="header-logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 21a9 9 0 100-18 9 9 0 000 18z" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 7v5l3 3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 2v2M12 20v2M4 12H2M22 12h-2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>Somnium</h1>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Celestial Soundscapes Widget -->
+        <div class="soundscapes-widget">
+          <button id="btn-soundscape-toggle" class="btn-soundscape-toggle" title="Play Ambient Soundscape">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="play-icon">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pause-icon hidden">
+              <rect x="6" y="4" width="4" height="16"/>
+              <rect x="14" y="4" width="4" height="16"/>
+            </svg>
+          </button>
+          
+          <div class="soundscape-controls">
+            <select id="soundscape-select" class="soundscape-select" title="Select Frequency">
+              <option value="theta">Theta Lucid Drone (6Hz Binaural) 🧘</option>
+              <option value="astral">Astral Pulse (Deep Space) 🌌</option>
+              <option value="cosmic">Cosmic Meditation (Sub-bass waves) 🪐</option>
+            </select>
+            <div class="volume-container">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="volume-icon">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/>
+              </svg>
+              <input type="range" id="soundscape-volume" class="volume-slider" min="0" max="1" step="0.05" value="0.3">
+            </div>
+          </div>
+
+          <div class="soundscape-visualizer" id="soundscape-visualizer">
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+          </div>
+        </div>
+
+        <!-- Eco-Astral Mode Toggle -->
+        <button id="btn-eco-toggle" class="btn-eco-toggle" title="Toggle Eco-Astral Mode (Reduce Lag)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="leaf-icon">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 9.8a7 7 0 0 1-9 8.2Z"/>
+            <path d="M9 22v-4M19 2s-3 6-10 8"/>
+          </svg>
+        </button>
+
+        <!-- User Profile / Auth Status Widget -->
+        <div id="user-auth-widget" class="user-auth-widget hidden">
+          <img id="user-avatar" class="user-avatar" src="" alt="User Avatar">
+          <span id="user-display-name" class="user-display-name"></span>
+          <button id="btn-signout" class="btn-signout" title="Sign Out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- API Status Pill -->
+        <div id="api-status-pill" class="api-status-pill status-offline">
+          <span class="status-dot"></span>
+          <span id="api-status-text">Keys Missing</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="new-dream">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>New Dream</span>
+      </button>
+      <button class="nav-tab" data-tab="journal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20M4 19.5V5A2.5 2.5 0 016.5 2.5H20v14.5H6.5a2.5 2.5 0 00-2.5 2.5z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Journal</span>
+      </button>
+      <button class="nav-tab" data-tab="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 20V10M12 20V4M6 20v-6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Analytics</span>
+      </button>
+      <button class="nav-tab" data-tab="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 005 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- 1. NEW DREAM VIEW -->
+      <section id="new-dream-view" class="view-panel active">
+        <div class="layout-grid">
+          <!-- Left Column: Dream Form -->
+          <div class="form-container glass-card">
+            <h2 class="view-title">Record a Dream</h2>
+            
+            <form id="dream-form" novalidate>
+              <div class="form-row split">
+                <div class="form-group">
+                  <label for="dream-date">Date</label>
+                  <input type="date" id="dream-date" name="dream-date">
+                </div>
+                <div class="form-group">
+                  <label for="dream-type">Dream Type</label>
+                  <select id="dream-type" name="dream-type">
+                    <option value="Normal">Normal</option>
+                    <option value="Lucid">Lucid 👁️</option>
+                    <option value="Nightmare">Nightmare 💀</option>
+                    <option value="Astral">Astral/Cosmic 🌌</option>
+                    <option value="Recurring">Recurring 🔄</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="dream-title">Dream Title <span class="required">*</span></label>
+                <input type="text" id="dream-title" name="dream-title" placeholder="A key, a door, a flight through the rings of Saturn...">
+              </div>
+
+              <div class="form-group">
+                <label for="dream-description">What did you experience? <span class="required">*</span></label>
+                <textarea id="dream-description" name="dream-description" rows="5" placeholder="Describe the landscapes, emotions, colors, and narratives in detail..."></textarea>
+              </div>
+
+              <!-- Form Validation Error -->
+              <div id="form-error" class="error-banner hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="error-icon">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="error-message">Title and description are required.</span>
+              </div>
+
+              <!-- Mood Pills Multi-select -->
+              <div class="form-group">
+                <label>Emotions & Moods</label>
+                <div class="mood-selector" id="mood-pill-container">
+                  <button type="button" class="mood-pill" data-mood="🌌 Astral">🌌 Astral</button>
+                  <button type="button" class="mood-pill" data-mood="🔮 Prophetic">🔮 Prophetic</button>
+                  <button type="button" class="mood-pill" data-mood="💀 Nightmare">💀 Nightmare</button>
+                  <button type="button" class="mood-pill" data-mood="💫 Ecstatic">💫 Ecstatic</button>
+                  <button type="button" class="mood-pill" data-mood="🌊 Serene">🌊 Serene</button>
+                  <button type="button" class="mood-pill" data-mood="🌪️ Chaotic">🌪️ Chaotic</button>
+                  <button type="button" class="mood-pill" data-mood="🪐 Cosmic">🪐 Cosmic</button>
+                  <button type="button" class="mood-pill" data-mood="👁️ Lucid">👁️ Lucid</button>
+                  <button type="button" class="mood-pill" data-mood="🍃 Peaceful">🍃 Peaceful</button>
+                  <button type="button" class="mood-pill" data-mood="⚡ Vivid">⚡ Vivid</button>
+                  <button type="button" class="mood-pill" data-mood="❓ Confused">❓ Confused</button>
+                  <button type="button" class="mood-pill" data-mood="❤️ Longing">❤️ Longing</button>
+                </div>
+              </div>
+
+              <!-- Subconscious Illustration Upload & Sketchpad -->
+              <div class="form-group">
+                <label>Subconscious Illustration (Sketch or Reference Image)</label>
+                
+                <div class="illustration-tabs">
+                  <button type="button" class="illus-tab active" data-tab-name="sketch">Draw Symbol</button>
+                  <button type="button" class="illus-tab" data-tab-name="upload">Upload Reference</button>
+                </div>
+
+                <div class="illustration-panels">
+                  <!-- Sketchpad Panel -->
+                  <div id="panel-sketch" class="illus-panel active">
+                    <div class="sketchpad-editor">
+                      <canvas id="sketch-canvas" width="480" height="200"></canvas>
+                      
+                      <div class="sketchpad-controls">
+                        <div class="color-palette">
+                          <button type="button" class="color-dot active" data-color="#06b6d4" style="background-color:#06b6d4;" title="Cyan"></button>
+                          <button type="button" class="color-dot" data-color="#8b5cf6" style="background-color:#8b5cf6;" title="Purple"></button>
+                          <button type="button" class="color-dot" data-color="#ffffff" style="background-color:#ffffff;" title="White"></button>
+                          <button type="button" class="color-dot eraser-dot" data-color="eraser" title="Eraser">🧹</button>
+                        </div>
+
+                        <div class="brush-slider-wrap">
+                          <span class="brush-size-val">6px</span>
+                          <input type="range" id="brush-size" min="2" max="24" value="6" title="Brush Size">
+                        </div>
+
+                        <div class="sketch-actions-row">
+                          <button type="button" id="btn-sketch-undo" class="btn btn-mini">Undo</button>
+                          <button type="button" id="btn-sketch-clear" class="btn btn-mini btn-danger">Clear</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Upload Image Panel -->
+                  <div id="panel-upload" class="illus-panel">
+                    <div class="upload-dropzone" id="upload-dropzone">
+                      <svg class="dropzone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <p>Drag reference files here or <span class="browse-btn">browse</span></p>
+                      <input type="file" id="image-file-input" accept="image/*" class="hidden">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Attached image preview status -->
+                <div id="attachment-preview-container" class="attachment-preview-container hidden">
+                  <div class="preview-card">
+                    <img id="attachment-preview-img" src="" alt="Sketch or Reference">
+                    <button type="button" id="btn-remove-attachment" class="btn-remove-attachment" title="Remove Attachment">×</button>
+                  </div>
+                  <span class="attachment-msg">Attached to dream log. Ready for multimodal analysis.</span>
+                </div>
+              </div>
+
+              <!-- Subconscious Voice Notes (Audio Narration) -->
+              <div class="form-group">
+                <label>Subconscious Voice Notes (Audio Dictation)</label>
+                <div class="audio-recorder-container">
+                  <div class="recorder-controls">
+                    <button type="button" id="btn-audio-record" class="btn-record-mic" title="Record Voice Note">
+                      <span class="mic-icon-dot"></span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mic-svg">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                      </svg>
+                    </button>
+                    <span id="audio-timer" class="audio-timer">0:00 / 1:00</span>
+                    
+                    <div class="audio-upload-wrapper">
+                      <button type="button" id="btn-audio-upload-trigger" class="btn btn-mini" title="Upload Audio File">Upload Audio</button>
+                      <input type="file" id="audio-file-input" accept="audio/*" class="hidden">
+                    </div>
+                  </div>
+                  
+                  <div class="recorder-wave-container">
+                    <canvas id="audio-wave-canvas" width="480" height="40"></canvas>
+                  </div>
+                  
+                  <!-- Attached audio preview -->
+                  <div id="audio-preview-container" class="audio-preview-container hidden">
+                    <audio id="audio-preview-player" controls></audio>
+                    <button type="button" id="btn-remove-audio" class="btn-remove-audio" title="Remove Audio Note">×</button>
+                  </div>
+                  <span class="audio-help-msg">Dictate your dream experience directly or upload an audio clip (max 60 seconds). Ready for multimodal audio analysis.</span>
+                </div>
+              </div>
+
+              <div class="form-row split">
+                <!-- Clarity selector -->
+                <div class="form-group">
+                  <label for="dream-clarity">Vividness & Clarity</label>
+                  <div class="clarity-rating-container">
+                    <input type="range" id="dream-clarity" name="dream-clarity" min="1" max="5" value="3">
+                    <div class="clarity-labels">
+                      <span>Vague (1)</span>
+                      <span>Moderate (3)</span>
+                      <span>Hyper-Vivid (5)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tag input -->
+                <div class="form-group">
+                  <label for="tag-input">Tags</label>
+                  <div class="tag-input-wrapper">
+                    <div id="tag-chips" class="tag-chips"></div>
+                    <input type="text" id="tag-input" placeholder="Type tag and press Enter...">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" id="btn-save-only" class="btn btn-secondary">Save Only</button>
+                <button type="button" id="btn-save-analyze" class="btn btn-primary">
+                  <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.32 11.32l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Save & Analyze</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right Column: Analysis Box -->
+          <div class="analysis-container glass-card">
+            <div class="analysis-header">
+              <h2 class="view-title">Cosmic Interpretation</h2>
+              <div class="analysis-header-actions">
+                <button type="button" id="btn-speak-analysis" class="btn-speak-text hidden" title="Speak Interpretation">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="speak-play-svg">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  </svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="speak-stop-svg hidden">
+                    <rect x="4" y="4" width="16" height="16"/>
+                  </svg>
+                </button>
+                <div id="active-key-badge" class="key-badge hidden">Key 1</div>
+              </div>
+            </div>
+            
+            <div class="analysis-body" id="analysis-output-box">
+              <!-- Loading spinner / waiting message / output -->
+              <div class="analysis-placeholder" id="analysis-placeholder">
+                <svg class="constellation-svg" viewBox="0 0 100 100">
+                  <circle cx="50" cy="20" r="2" fill="currentColor"/>
+                  <circle cx="20" cy="50" r="1.5" fill="currentColor"/>
+                  <circle cx="80" cy="50" r="1.5" fill="currentColor"/>
+                  <circle cx="50" cy="80" r="2" fill="currentColor"/>
+                  <line x1="50" y1="20" x2="20" y2="50" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
+                  <line x1="50" y1="20" x2="80" y2="50" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
+                  <line x1="20" y1="50" x2="50" y2="80" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
+                  <line x1="80" y1="50" x2="50" y2="80" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
+                </svg>
+                <p>Awaiting dream analysis. Press <strong>Save & Analyze</strong> to decode the celestial alignments of your subconscious.</p>
+              </div>
+
+              <div class="analysis-loading hidden" id="analysis-loading">
+                <div class="loader-orbit">
+                  <div class="loader-sun"></div>
+                  <div class="loader-planet"></div>
+                </div>
+                <p>Consulting the cosmic ledger. Translating archetypes...</p>
+              </div>
+
+              <!-- Collapsible AI Reasoning (Subconscious Cogitations) -->
+              <details id="analysis-reasoning-container" class="reasoning-details-box hidden">
+                <summary>
+                  <span class="reasoning-summary-title">
+                    <svg class="cogitation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 1 14 16H2m15.59-5.59A2 2 0 1 1 19 12H2"/>
+                    </svg>
+                    Subconscious Cogitations (AI Reasoning Process)
+                  </span>
+                  <span class="reasoning-toggle-caret">▾</span>
+                </summary>
+                <div id="analysis-reasoning-text" class="reasoning-text-content">
+                  <!-- Filled dynamically -->
+                </div>
+              </details>
+
+              <div class="analysis-content markdown-body hidden" id="analysis-content">
+                <!-- Filled dynamically by marked -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. JOURNAL VIEW -->
+      <section id="journal-view" class="view-panel">
+        <div class="journal-header-controls glass-card">
+          <h2 class="view-title">The Vault</h2>
+          
+          <div class="filter-bar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input type="text" id="search-dreams" placeholder="Search titles, descriptions, tags...">
+            </div>
+
+            <div class="select-wrapper">
+              <select id="filter-type">
+                <option value="All">All Types</option>
+                <option value="Normal">Normal</option>
+                <option value="Lucid">Lucid 👁️</option>
+                <option value="Nightmare">Nightmare 💀</option>
+                <option value="Astral">Astral/Cosmic 🌌</option>
+                <option value="Recurring">Recurring 🔄</option>
+              </select>
+            </div>
+
+            <div class="select-wrapper">
+              <select id="filter-status">
+                <option value="All">All Analysis Status</option>
+                <option value="Analyzed">Analyzed ✓</option>
+                <option value="Unanalyzed">Unanalyzed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="journal-empty" class="journal-empty glass-card">
+          <div class="empty-icon-wrapper">🌌</div>
+          <h3>The Vault is Silent</h3>
+          <p>No dreams logged matching your filter. Record a new dream or clear search filters to display entries.</p>
+        </div>
+
+        <div class="dream-cards-grid" id="dream-cards-container">
+          <!-- Dynamically populated card items -->
+        </div>
+      </section>
+
+      <!-- 3. ANALYTICS VIEW -->
+      <section id="analytics-view" class="view-panel">
+        <div class="stats-overview-grid">
+          <div class="stat-card glass-card">
+            <div class="stat-icon text-purple">🔮</div>
+            <div class="stat-data">
+              <span class="stat-label">Total Logs</span>
+              <span class="stat-val" id="stat-total-dreams">0</span>
+            </div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="stat-icon text-cyan">✨</div>
+            <div class="stat-data">
+              <span class="stat-label">Analyzed Logs</span>
+              <span class="stat-val" id="stat-analyzed-count">0</span>
+            </div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="stat-icon text-blue">👁️</div>
+            <div class="stat-data">
+              <span class="stat-label">Lucid Count</span>
+              <span class="stat-val" id="stat-lucid-count">0</span>
+            </div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="stat-icon text-yellow">🌟</div>
+            <div class="stat-data">
+              <span class="stat-label">Avg Clarity</span>
+              <span class="stat-val" id="stat-avg-clarity">0.0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-charts-grid">
+          <!-- Weekly Activity Bar Chart -->
+          <div class="chart-card glass-card">
+            <h3 class="chart-title">Weekly Activity (Last 7 Days)</h3>
+            <div class="chart-container" id="weekly-chart-wrapper">
+              <!-- Inline Responsive SVG Bar Chart rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Top Emotions Progress bars -->
+          <div class="chart-card glass-card">
+            <h3 class="chart-title">Subconscious Moods (Frequency Rank)</h3>
+            <div class="chart-container flex-col" id="mood-frequency-container">
+              <!-- Dynamically populated progress rows -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SETTINGS VIEW -->
+      <section id="settings-view" class="view-panel">
+        <div class="settings-grid">
+          <!-- API Keys Box -->
+          <div class="settings-box glass-card">
+            <h3 class="settings-box-title">OpenRouter API Configuration</h3>
+            <p class="settings-help-text">Configure up to three API keys. DreamVault rotates between them sequentially. If a key is rate-limited (429), it rotates and retries automatically.</p>
+            
+            <div class="api-keys-inputs">
+              <div class="api-key-row">
+                <div class="api-status-marker">
+                  <span class="key-status-dot" id="dot-key-1"></span>
+                  <span class="key-label">Key 1</span>
+                </div>
+                <input type="password" class="api-key-input" id="api-key-1" placeholder="sk-or-v1-..." autocomplete="new-password">
+              </div>
+              
+              <div class="api-key-row">
+                <div class="api-status-marker">
+                  <span class="key-status-dot" id="dot-key-2"></span>
+                  <span class="key-label">Key 2</span>
+                </div>
+                <input type="password" class="api-key-input" id="api-key-2" placeholder="sk-or-v1-..." autocomplete="new-password">
+              </div>
+              
+              <div class="api-key-row">
+                <div class="api-status-marker">
+                  <span class="key-status-dot" id="dot-key-3"></span>
+                  <span class="key-label">Key 3</span>
+                </div>
+                <input type="password" class="api-key-input" id="api-key-3" placeholder="sk-or-v1-..." autocomplete="new-password">
+              </div>
+            </div>
+          </div>
+
+          <!-- Firebase Sync Box -->
+          <div class="settings-box glass-card">
+            <h3 class="settings-box-title">Firebase Cloud Sanctuary</h3>
+            <p class="settings-help-text">Synchronize your dream vault across devices using your own Google Firebase Cloud database. Input your web app configuration credentials below.</p>
+            
+            <div class="firebase-config-inputs">
+              <div class="form-group">
+                <label for="fb-api-key">API Key</label>
+                <input type="password" id="fb-api-key" placeholder="AIzaSy..." autocomplete="new-password">
+              </div>
+              <div class="form-row split">
+                <div class="form-group">
+                  <label for="fb-auth-domain">Auth Domain</label>
+                  <input type="text" id="fb-auth-domain" placeholder="your-app.firebaseapp.com">
+                </div>
+                <div class="form-group">
+                  <label for="fb-project-id">Project ID</label>
+                  <input type="text" id="fb-project-id" placeholder="your-app">
+                </div>
+              </div>
+              <div class="form-row split">
+                <div class="form-group">
+                  <label for="fb-storage-bucket">Storage Bucket</label>
+                  <input type="text" id="fb-storage-bucket" placeholder="your-app.appspot.com">
+                </div>
+                <div class="form-group">
+                  <label for="fb-sender-id">Messaging Sender ID</label>
+                  <input type="text" id="fb-sender-id" placeholder="84729104...">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="fb-app-id">App ID</label>
+                <input type="text" id="fb-app-id" placeholder="1:84729104:web:abcd...">
+              </div>
+              <div class="settings-actions">
+                <button id="btn-save-firebase" class="btn btn-primary">Save & Connect Cloud</button>
+                <button id="btn-disconnect-firebase" class="btn btn-danger hidden">Disconnect Cloud</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vault Management Box -->
+          <div class="settings-box glass-card">
+            <h3 class="settings-box-title">Vault Administration</h3>
+            <p class="settings-help-text">Import, export, or permanently reset your dream journal logs. All data remains in local browser storage.</p>
+            
+            <div class="settings-actions">
+              <button id="btn-export-data" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Export Vault (JSON)</span>
+              </button>
+              
+              <button id="btn-trigger-import" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Import Vault (JSON)</span>
+              </button>
+              <input type="file" id="import-file-input" accept=".json" class="hidden">
+              
+              <button id="btn-install-app" class="btn btn-primary hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                  <path d="M19 14l-7 7-7-7M12 21V3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Install Application</span>
+              </button>
+              
+              <button id="btn-clear-data" class="btn btn-danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Clear All Data</span>
+              </button>
+            </div>
+            
+            <div id="settings-status-message" class="settings-message hidden"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- DREAM DETAILS MODAL -->
+  <div id="dream-detail-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card">
+      <header class="modal-header">
+        <div class="modal-title-row">
+          <h3 id="modal-dream-title" class="modal-title">Dream Title</h3>
+          <span id="modal-dream-date" class="modal-date">Date</span>
+        </div>
+        <button id="modal-close-btn" class="modal-close-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+      
+      <div class="modal-body">
+        <!-- Badges Row -->
+        <div class="modal-badges-row">
+          <span id="modal-type-badge" class="badge badge-type">Normal</span>
+          <span id="modal-clarity-badge" class="badge badge-clarity">Clarity: 3/5</span>
+          <div id="modal-moods-row" class="modal-badge-list"></div>
+        </div>
+
+        <!-- Attached reference preview inside Modal -->
+        <div id="modal-image-container" class="modal-image-container hidden">
+          <img id="modal-dream-image" src="" alt="Dream reference detail attachment">
+        </div>
+
+        <!-- Attached audio note playback inside Modal -->
+        <div id="modal-audio-container" class="modal-audio-container hidden">
+          <h4 class="modal-section-title">Subconscious Voice Note</h4>
+          <audio id="modal-dream-audio" controls></audio>
+        </div>
+
+        <!-- Description Section -->
+        <div class="modal-section">
+          <h4 class="modal-section-title">Subconscious Narrative</h4>
+          <p id="modal-dream-description" class="modal-text-description">The full experience goes here...</p>
+        </div>
+
+        <!-- Tags Row -->
+        <div id="modal-tags-container" class="modal-tags-row">
+          <!-- Tags go here -->
+        </div>
+
+        <!-- Divider -->
+        <div class="modal-divider"></div>
+
+        <!-- Analysis Section -->
+        <div class="modal-section">
+          <div class="modal-analysis-header">
+            <h4 class="modal-section-title">Cosmic Interpretation</h4>
+            <div class="modal-analysis-actions">
+              <button type="button" id="btn-modal-speak-analysis" class="btn-speak-text hidden" title="Speak Interpretation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="speak-play-svg">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="speak-stop-svg hidden">
+                  <rect x="4" y="4" width="16" height="16"/>
+                </svg>
+              </button>
+              <div id="modal-key-badge" class="key-badge hidden">Key 1</div>
+            </div>
+          </div>
+
+          <!-- Unanalyzed Content State -->
+          <div id="modal-unanalyzed-state" class="modal-unanalyzed-state hidden">
+            <p>This dream hasn't been analyzed yet. Let the cosmic intelligence parse its archetypes.</p>
+            <button id="btn-modal-analyze" class="btn btn-primary">
+              <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.32 11.32l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Analyze This Dream</span>
+            </button>
+          </div>
+
+          <!-- Loader -->
+          <div id="modal-analysis-loading" class="analysis-loading hidden">
+            <div class="loader-orbit">
+              <div class="loader-sun"></div>
+              <div class="loader-planet"></div>
+            </div>
+            <p>Consulting the cosmic ledger. Translating archetypes...</p>
+          </div>
+
+          <!-- Collapsible AI Reasoning (Subconscious Cogitations) -->
+          <details id="modal-reasoning-container" class="reasoning-details-box hidden">
+            <summary>
+              <span class="reasoning-summary-title">
+                <svg class="cogitation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 1 14 16H2m15.59-5.59A2 2 0 1 1 19 12H2"/>
+                </svg>
+                Subconscious Cogitations (AI Reasoning Process)
+              </span>
+              <span class="reasoning-toggle-caret">▾</span>
+            </summary>
+            <div id="modal-reasoning-text" class="reasoning-text-content">
+              <!-- Filled dynamically -->
+            </div>
+          </details>
+
+          <!-- Analyzed Content State -->
+          <div id="modal-analysis-content" class="modal-analysis-content markdown-body hidden">
+            <!-- Markdown content filled here -->
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button id="btn-modal-delete" class="btn btn-danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" fill="none"/>
+          </svg>
+          <span>Delete Entry</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
