@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Eco Mode
     btnEcoToggle: document.getElementById('btn-eco-toggle'),
+    btnLandingEcoToggle: document.getElementById('btn-landing-eco-toggle'),
 
     // Landing Page
     landingView: document.getElementById('landing-view'),
@@ -257,12 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
     el.apiKey3.value = localStorage.getItem('openrouter_key_3') || '';
 
     // Load Firebase Config fields
-    el.fbApiKey.value = localStorage.getItem('fb_api_key') || '';
-    el.fbAuthDomain.value = localStorage.getItem('fb_auth_domain') || '';
-    el.fbProjectId.value = localStorage.getItem('fb_project_id') || '';
-    el.fbStorageBucket.value = localStorage.getItem('fb_storage_bucket') || '';
-    el.fbSenderId.value = localStorage.getItem('fb_sender_id') || '';
-    el.fbAppId.value = localStorage.getItem('fb_app_id') || '';
+    el.fbApiKey.value = localStorage.getItem('fb_api_key') || 'AIzaSyAlm-kPTEh_jqEd3Ib_d-xUi_KSF0kYVK4';
+    el.fbAuthDomain.value = localStorage.getItem('fb_auth_domain') || 'alchera-tracker.firebaseapp.com';
+    el.fbProjectId.value = localStorage.getItem('fb_project_id') || 'alchera-tracker';
+    el.fbStorageBucket.value = localStorage.getItem('fb_storage_bucket') || 'alchera-tracker.firebasestorage.app';
+    el.fbSenderId.value = localStorage.getItem('fb_sender_id') || '552776331598';
+    el.fbAppId.value = localStorage.getItem('fb_app_id') || '1:552776331598:web:ddd25d00f9f09674942e1f';
   }
 
   // Save to LocalStorage
@@ -961,6 +962,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Eco Mode Toggle
     el.btnEcoToggle.addEventListener('click', toggleEcoMode);
+    if (el.btnLandingEcoToggle) {
+      el.btnLandingEcoToggle.addEventListener('click', toggleEcoMode);
+    }
 
     // Firebase Auth Events
     el.btnGoogleLogin.addEventListener('click', loginWithGoogle);
@@ -1961,12 +1965,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- FIREBASE INTEGRATION & PORTAL IMPLEMENTATION ---
   function initFirebase() {
-    const apiKey = localStorage.getItem('fb_api_key');
-    const authDomain = localStorage.getItem('fb_auth_domain');
-    const projectId = localStorage.getItem('fb_project_id');
-    const storageBucket = localStorage.getItem('fb_storage_bucket');
-    const messagingSenderId = localStorage.getItem('fb_sender_id');
-    const appId = localStorage.getItem('fb_app_id');
+    const apiKey = localStorage.getItem('fb_api_key') || "AIzaSyAlm-kPTEh_jqEd3Ib_d-xUi_KSF0kYVK4";
+    const authDomain = localStorage.getItem('fb_auth_domain') || "alchera-tracker.firebaseapp.com";
+    const projectId = localStorage.getItem('fb_project_id') || "alchera-tracker";
+    const storageBucket = localStorage.getItem('fb_storage_bucket') || "alchera-tracker.firebasestorage.app";
+    const messagingSenderId = localStorage.getItem('fb_sender_id') || "552776331598";
+    const appId = localStorage.getItem('fb_app_id') || "1:552776331598:web:ddd25d00f9f09674942e1f";
     
     if (!apiKey || !projectId) {
       state.firebaseConnected = false;
