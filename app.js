@@ -227,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderJournal();
     renderAnalytics();
     registerServiceWorker();
+    initCustomSelects();
   }
 
   // Load from LocalStorage
@@ -289,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     
     let stars = [];
-    const starCount = 100;
+    const starCount = 60;
     let starfieldFrameId = null;
     
     function resize() {
@@ -323,11 +324,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = stars[i];
         s.phase += s.twinkleSpeed;
         const currentAlpha = 0.2 + (Math.sin(s.phase) + 1) * 0.4 * s.alpha;
-        
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        const size = s.radius * 2;
         ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
-        ctx.fill();
+        ctx.fillRect(s.x, s.y, size, size);
       }
       
       starfieldFrameId = requestAnimationFrame(draw);
@@ -924,12 +923,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Delete from Modal
-    el.btnModalDelete.addEventListener('click', () => {
+    el.btnModalDelete.addEventListener('click', async () => {
       const activeId = el.dreamDetailModal.getAttribute('data-active-id');
-      if (activeId && confirm('Are you sure you want to permanently erase this dream from the vault?')) {
-        state.dreams = state.dreams.filter(d => d.id !== activeId);
-        saveDreams();
-        closeModal();
+      if (activeId) {
+        const confirmed = await showConfirmDialog('Delete Dream', 'Are you sure you want to permanently erase this dream from the vault?', '🗑️', 'Delete Forever', true);
+        if (confirmed) {
+          state.dreams = state.dreams.filter(d => d.id !== activeId);
+          saveDreams();
+          closeModal();
+          showToast('Dream entry erased from the vault.', 'success');
+        }
       }
     });
 
@@ -972,8 +975,9 @@ document.addEventListener('DOMContentLoaded', () => {
       state.guestMode = true;
       switchLandingState();
     });
-    el.btnSignout.addEventListener('click', () => {
-      if (confirm("Sign out from your Google account?")) {
+    el.btnSignout.addEventListener('click', async () => {
+      const confirmed = await showConfirmDialog('Sign Out', 'Sign out from your Google account?', '👋', 'Sign Out', false);
+      if (confirmed) {
         if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
           firebase.auth().signOut();
         }
@@ -1239,7 +1243,7 @@ document.addEventListener('DOMContentLoaded', () => {
           messages: [
             {
               role: 'system',
-              content: 'You are a professional dream interpreter, psychoanalyst, and celestial mystic. Analyze the user\'s dream details. Provide an inspiring, deep, structured analysis formatted in beautiful markdown (use headers, lists, and a highlighted blockquote for the core advice/archetype). Focus on symbolic representations, archetypal alignments, emotional releases, and subconscious advice. Keep your response concise, engaging, and cosmic in tone.'
+              content: 'You are a professional psychologist and dream analyst. Analyze the user\'s dream details based on psychological principles, cognitive processing, and realistic emotional reflections. Provide a grounded, objective, and structured analysis formatted in beautiful markdown (use headers, lists, and a highlighted blockquote for the core psychological insight). Avoid mystical or supernatural fluff, and focus on practical reality, emotional releases, and subconscious processing. Keep your response concise, analytical, and insightful.'
             },
             {
               role: 'user',
@@ -1551,7 +1555,7 @@ document.addEventListener('DOMContentLoaded', () => {
       el.btnModalSpeakAnalysis.classList.remove('hidden');
     } else {
       // Show modal error message
-      alert(`Interpretation Error: ${result.error}`);
+      showToast(`Interpretation Error: ${result.error}`, 'error', 6000);
       el.modalUnanalyzedState.classList.remove('hidden');
     }
   }
@@ -1859,8 +1863,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 5000);
   }
 
-  function clearAllVaultData() {
-    if (confirm("WARNING: This will permanently erase ALL configuration variables, API keys, and dream journal files stored in this browser. This cannot be undone. Proceed?")) {
+  async function clearAllVaultData() {
+    const confirmed = await showConfirmDialog('Erase Everything', 'This will permanently erase ALL configuration, API keys, and dream journal data. This cannot be undone.', '⚠️', 'Erase All Data', true);
+    if (confirmed) {
       stopSoundscape();
       localStorage.clear();
       state.dreams = [];
@@ -1896,7 +1901,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Go to homepage
       switchTab('new-dream');
       
-      alert("Vault data has been completely erased.");
+      showToast('Vault data has been completely erased.', 'success');
     }
   }
 
@@ -2014,7 +2019,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function loginWithGoogle() {
     if (!state.firebaseConnected) {
-      alert("Firebase cloud database is not connected. Please input your credentials in Settings first, or enter in Guest Mode.");
+      showToast('Firebase cloud database is not connected. Configure credentials in Settings or enter Guest Mode.', 'warning', 5000);
       switchTab('settings');
       return;
     }
@@ -2026,7 +2031,7 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(err => {
         console.error("Google Authentication error", err);
-        alert(`Authentication failed: ${err.message}`);
+        showToast(`Authentication failed: ${err.message}`, 'error', 5000);
       });
   }
 
@@ -2042,8 +2047,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initFirebase();
   }
 
-  function disconnectFirebase() {
-    if (confirm("Disconnect from your Firebase cloud sanctuary? Your logs will remain in this browser, but online syncing will stop.")) {
+  async function disconnectFirebase() {
+    const confirmed = await showConfirmDialog('Disconnect Cloud', 'Disconnect from your Firebase cloud sanctuary? Your logs will remain in this browser, but online syncing will stop.', '☁️', 'Disconnect', true);
+    if (confirmed) {
       if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
         firebase.auth().signOut().then(() => {
           localStorage.removeItem('fb_api_key');
@@ -2193,7 +2199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const audioBlob = new Blob(recordingState.audioChunks, { type: 'audio/webm' });
         
         if (audioBlob.size > 1.5 * 1024 * 1024) {
-          alert("Subconscious audio narration exceeds safety limits (1.5MB). Recording discarded.");
+          showToast('Audio narration exceeds 1.5MB safety limit. Recording discarded.', 'warning');
           removeAudioAttachment();
           return;
         }
@@ -2228,7 +2234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       console.error("Failed to acquire microphone access", err);
-      alert("Microphone connection denied or device unavailable.");
+      showToast('Microphone access denied or device unavailable.', 'error');
     }
   }
 
@@ -2392,12 +2398,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) return;
     
     if (!file.type.startsWith('audio/')) {
-      alert("Attached document is not valid audio.");
+      showToast('Attached document is not valid audio.', 'error');
       return;
     }
     
     if (file.size > 1.5 * 1024 * 1024) {
-      alert("Attached audio file exceeds size threshold (1.5MB). Upload aborted.");
+      showToast('Audio file exceeds 1.5MB size limit. Upload aborted.', 'warning');
       return;
     }
     
@@ -2527,6 +2533,107 @@ document.addEventListener('DOMContentLoaded', () => {
         '"': '&quot;'
       }[tag] || tag)
     );
+  }
+
+  // --- CUSTOM TOAST NOTIFICATION SYSTEM ---
+  function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const icons = { success: '✓', error: '✕', warning: '⚠', info: '✦' };
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || '✦'}</span><span>${escapeHTML(message)}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('removing');
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  // --- CUSTOM CONFIRMATION DIALOG SYSTEM ---
+  function showConfirmDialog(title, message, icon, confirmText, dangerMode) {
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('custom-dialog-overlay');
+      const titleEl = document.getElementById('dialog-title');
+      const msgEl = document.getElementById('dialog-message');
+      const iconEl = document.getElementById('dialog-icon');
+      const confirmBtn = document.getElementById('dialog-confirm-btn');
+      const cancelBtn = document.getElementById('dialog-cancel-btn');
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+      iconEl.textContent = icon || '🔮';
+      confirmBtn.textContent = confirmText || 'Confirm';
+      if (dangerMode) {
+        confirmBtn.className = 'btn btn-danger';
+      } else {
+        confirmBtn.className = 'btn btn-primary';
+      }
+      overlay.classList.remove('hidden');
+      function cleanup() {
+        overlay.classList.add('hidden');
+        confirmBtn.removeEventListener('click', onConfirm);
+        cancelBtn.removeEventListener('click', onCancel);
+        overlay.removeEventListener('click', onOverlayClick);
+      }
+      function onConfirm() { cleanup(); resolve(true); }
+      function onCancel() { cleanup(); resolve(false); }
+      function onOverlayClick(e) { if (e.target === overlay) { cleanup(); resolve(false); } }
+      confirmBtn.addEventListener('click', onConfirm);
+      cancelBtn.addEventListener('click', onCancel);
+      overlay.addEventListener('click', onOverlayClick);
+    });
+  }
+
+  // --- CUSTOM SELECT DROPDOWN SYSTEM ---
+  function initCustomSelects() {
+    document.querySelectorAll('select:not(.custom-select-initialized)').forEach(sel => {
+      sel.classList.add('custom-select-initialized');
+      const wrap = document.createElement('div');
+      wrap.className = 'custom-select-wrap';
+      sel.parentNode.insertBefore(wrap, sel);
+      const trigger = document.createElement('div');
+      trigger.className = 'custom-select-trigger';
+      trigger.setAttribute('tabindex', '0');
+      const optionsBox = document.createElement('div');
+      optionsBox.className = 'custom-select-options';
+      function buildOptions() {
+        optionsBox.innerHTML = '';
+        Array.from(sel.options).forEach((opt, idx) => {
+          const div = document.createElement('div');
+          div.className = 'custom-select-option' + (idx === sel.selectedIndex ? ' selected' : '');
+          div.textContent = opt.textContent;
+          div.setAttribute('data-value', opt.value);
+          div.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            trigger.textContent = opt.textContent;
+            optionsBox.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+            div.classList.add('selected');
+            wrap.classList.remove('open');
+          });
+          optionsBox.appendChild(div);
+        });
+      }
+      buildOptions();
+      trigger.textContent = sel.options[sel.selectedIndex]?.textContent || '';
+      sel.style.display = 'none';
+      wrap.appendChild(trigger);
+      wrap.appendChild(optionsBox);
+      wrap.appendChild(sel);
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.custom-select-wrap.open').forEach(w => { if (w !== wrap) w.classList.remove('open'); });
+        wrap.classList.toggle('open');
+      });
+      sel.addEventListener('change', () => {
+        trigger.textContent = sel.options[sel.selectedIndex]?.textContent || '';
+        buildOptions();
+      });
+    });
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.custom-select-wrap.open').forEach(w => w.classList.remove('open'));
+    });
   }
 
   // Start app!
