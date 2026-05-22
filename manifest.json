@@ -1,6 +1,6 @@
 {
-  "name": "Somnium - Celestial Dream Journal",
-  "short_name": "Somnium",
+  "name": "Alchera - Celestial Dream Journal",
+  "short_name": "Alchera",
   "description": "A premium dream journal with AI-powered cosmic interpretations and cloud synchronization.",
   "start_url": "./index.html",
   "display": "standalone",

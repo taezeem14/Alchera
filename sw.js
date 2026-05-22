@@ -1,4 +1,4 @@
-const CACHE_NAME = 'somnium-v1';
+const CACHE_NAME = 'alchera-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

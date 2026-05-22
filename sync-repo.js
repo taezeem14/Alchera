@@ -11,7 +11,7 @@ function run(cmd) {
   }
 }
 
-console.log("🌌 \x1b[35mStarting Somnium Repo Auto-Sync...\x1b[0m");
+console.log("🌌 \x1b[35mStarting Alchera Repo Auto-Sync...\x1b[0m");
 
 // Check if git is initialized
 try {
@@ -41,7 +41,7 @@ try {
 if (!hasChanges) {
   console.log("✨ \x1b[32mNo changes to commit. Everything is up to date!\x1b[0m");
 } else {
-  const commitMsg = `update Somnium: automatic sync at ${new Date().toLocaleString()}`;
+  const commitMsg = `update Alchera: automatic sync at ${new Date().toLocaleString()}`;
   run(`git commit -m "${commitMsg}"`);
 }
 

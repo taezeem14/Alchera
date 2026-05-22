@@ -231,9 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load from LocalStorage
   function loadData() {
     try {
-      let stored = localStorage.getItem('somnium_dreams');
+      let stored = localStorage.getItem('alchera_dreams');
       if (!stored) {
-        stored = localStorage.getItem('dreamvault_dreams'); // Migration fallback
+        stored = localStorage.getItem('somnium_dreams') || localStorage.getItem('dreamvault_dreams'); // Migration fallback
       }
       state.dreams = stored ? JSON.parse(stored) : [];
     } catch (e) {
@@ -242,9 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     try {
-      let savedIndex = localStorage.getItem('somnium_key_index');
+      let savedIndex = localStorage.getItem('alchera_key_index');
       if (!savedIndex) {
-        savedIndex = localStorage.getItem('dreamvault_key_index'); // Migration fallback
+        savedIndex = localStorage.getItem('somnium_key_index') || localStorage.getItem('dreamvault_key_index'); // Migration fallback
       }
       state.currentKeyIndex = savedIndex ? parseInt(savedIndex, 10) : 1;
     } catch (e) {
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Save to LocalStorage
   function saveDreams() {
-    localStorage.setItem('somnium_dreams', JSON.stringify(state.dreams));
+    localStorage.setItem('alchera_dreams', JSON.stringify(state.dreams));
     renderJournal();
     renderAnalytics();
   }
@@ -1227,8 +1227,8 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://somnium.local',
-          'X-Title': 'Somnium'
+          'HTTP-Referer': 'https://alchera.local',
+          'X-Title': 'Alchera'
         },
         body: JSON.stringify({
           model: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
@@ -1261,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let nextIndex = state.currentKeyIndex + 1;
         if (nextIndex > 3) nextIndex = 1;
         state.currentKeyIndex = nextIndex;
-        localStorage.setItem('somnium_key_index', state.currentKeyIndex);
+        localStorage.setItem('alchera_key_index', state.currentKeyIndex);
 
         // Retry recursively with the next index
         return await runAnalysisAPI(description, title, type, moods, clarity, image, retryCount + 1);
@@ -1285,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let nextIndex = state.currentKeyIndex + 1;
         if (nextIndex > 3) nextIndex = 1;
         state.currentKeyIndex = nextIndex;
-        localStorage.setItem('somnium_key_index', state.currentKeyIndex);
+        localStorage.setItem('alchera_key_index', state.currentKeyIndex);
 
         return {
           success: true,
@@ -1934,7 +1934,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- ECO-ASTRAL PERFORMANCE MODE IMPLEMENTATION ---
   function initEcoMode() {
-    const savedEco = localStorage.getItem('somnium_eco_mode');
+    let savedEco = localStorage.getItem('alchera_eco_mode');
+    if (savedEco === null) {
+      savedEco = localStorage.getItem('somnium_eco_mode');
+    }
     state.ecoMode = savedEco === 'true';
     if (state.ecoMode) {
       document.body.classList.add('eco-mode');
@@ -1945,7 +1948,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function toggleEcoMode() {
     state.ecoMode = !state.ecoMode;
-    localStorage.setItem('somnium_eco_mode', state.ecoMode);
+    localStorage.setItem('alchera_eco_mode', state.ecoMode);
     if (state.ecoMode) {
       document.body.classList.add('eco-mode');
     } else {
@@ -2114,7 +2117,7 @@ document.addEventListener('DOMContentLoaded', () => {
           localMap.set(cd.id, cd);
         });
         state.dreams = Array.from(localMap.values());
-        localStorage.setItem('somnium_dreams', JSON.stringify(state.dreams));
+        localStorage.setItem('alchera_dreams', JSON.stringify(state.dreams));
         renderJournal();
         renderAnalytics();
       }

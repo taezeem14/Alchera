@@ -1,6 +1,6 @@
-# 🌌 Somnium — Celestial Subconscious Sanctuary (No Cap FR FR)
+# 🌌 Alchera — Celestial Subconscious Sanctuary (No Cap FR FR)
 
-A premium, high-key aesthetic PWA for recording and decoding your dreamscapes, rebranded to **Somnium** (latin for *The Dream* — referencing Johannes Kepler’s 1608 cosmic treatise, which is honestly a major flex 🪐). 
+A premium, high-key aesthetic PWA for recording and decoding your dreamscapes, branded as **Alchera** (referencing the Australian Aboriginal *Dreamtime* or *Alcheringa*, representing the primordial, eternal dream dimension 🪐). 
 
 If your laptop is giving major potato vibes and lagging, we got you. The **Eco-Astral Mode** shuts down the heavy canvas animations so your fans stop screaming.
 
