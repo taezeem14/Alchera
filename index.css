@@ -1258,6 +1258,55 @@ input[type="range"]::-webkit-slider-thumb:hover {
   font-weight: 600;
 }
 
+.markdown-body table {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markdown-body th,
+.markdown-body td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+
+.markdown-body th:last-child,
+.markdown-body td:last-child {
+  border-right: none;
+}
+
+.markdown-body tr:last-child td {
+  border-bottom: none;
+}
+
+.markdown-body thead {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.markdown-body th {
+  font-weight: 600;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.markdown-body tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.markdown-body tbody tr:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+
 /* ==========================================================================
    JOURNAL VIEW STYLING
    ========================================================================== */
